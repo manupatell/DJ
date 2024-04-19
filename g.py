@@ -67,7 +67,7 @@ banner_frames = [
     f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}",
     f"{MAGENTA}",
     f"{BLUE} TELEGRAM Support Bot {RED}= https://t.me/Black_Devil_Support_bot {RESET}",
-    f"{BLUE} Official Website   {RED} = https://girlfriend4u.rf.gd  {RESET}",
+    f"{BLUE} Official Website   {RED} = https://webomma.me  {RESET}",
     f"{MAGENTA}",
     f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}",
 ]
@@ -98,7 +98,7 @@ else:
     print(termux_banner)
     print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
     print(MAGENTA + "")
-    print(BLUE + " Official Website " + RED + "= https://girlfriend4u.rf.gd ")
+    print(BLUE + " Official Website " + RED + "= https://Webomma.me ")
     print(MAGENTA + "")
     print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
 
