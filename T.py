@@ -2,18 +2,6 @@ import importlib
 import subprocess
 import platform
 import os
-import time
-import urllib3
-import requests
-from colorama import init
-from colorama import Fore, Style
-import os
-import pymongo
-import random
-import string
-from telegram import Update, ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-from telegram.utils.helpers import escape_markdown
 
 def install_package(package_name):
     try:
@@ -34,6 +22,18 @@ else:
     subprocess.call('clear', shell=True)
 
 import sys
+import time
+import urllib3
+import requests
+from colorama import init
+from colorama import Fore, Style
+import os
+import pymongo
+import random
+import string
+from telegram import Update, ParseMode
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.utils.helpers import escape_markdown
 
 init(autoreset=True)
 
