@@ -2,6 +2,18 @@ import importlib
 import subprocess
 import platform
 import os
+import time
+import urllib3
+import requests
+from colorama import init
+from colorama import Fore, Style
+import os
+import pymongo
+import random
+import string
+from telegram import Update, ParseMode
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.utils.helpers import escape_markdown
 
 def install_package(package_name):
     try:
@@ -22,18 +34,6 @@ else:
     subprocess.call('clear', shell=True)
 
 import sys
-import time
-import urllib3
-import requests
-from colorama import init
-from colorama import Fore, Style
-import os
-import pymongo
-import random
-import string
-from telegram import Update, ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-from telegram.utils.helpers import escape_markdown
 
 init(autoreset=True)
 
@@ -164,9 +164,9 @@ db_tokens.update_one({}, {"$set": {"bot_token": bot_token}}, upsert=True)
 updater = Updater(bot_token, use_context=True)
 dispatcher = updater.dispatcher
 
-groups_collection = db['groups']
-channels_collection = db['channels']
 users_collection = db['users']
+groups_collection = db['groups']
+channels_collection = db['channels'] 
 
 def start(update: Update, context: CallbackContext):
     if update.message.chat.type == "private":
@@ -194,28 +194,20 @@ dispatcher.add_handler(start_handler)
 def broadcast(update: Update, context: CallbackContext):
     admin_user_id = (primary_admin_id, 6305575094, 6704116482)
     if update.effective_user.id not in admin_user_id:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Develop your own broadcast bot using the provided repository: https://github.com/devilworlds/Broadcast")
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Join Our Channel: https://t.me/cricxlinks")
         return
 
     message = update.message.reply_to_message or update.message
 
-    successful_broadcasts = {"groups": 0, "channels": 0, "users": 0}
-    failed_broadcasts = {"groups": 0, "channels": 0, "users": 0}
+    successful_broadcasts = {"groups": 0, "users": 0, "channels": 0}
+    failed_broadcasts = {"groups": 0, "users": 0, "channels": 0}
 
     for group in groups_collection.find():
         try:
             context.bot.copy_message(chat_id=group["_id"], from_chat_id=update.effective_chat.id, message_id=message.message_id)
             successful_broadcasts["groups"] += 1
         except Exception as e:
-            failed_broadcasts["groups"] += 1
-            
-            # Broadcast to channels
-    for channel in channels_collection.find():
-        try:
-            context.bot.copy_message(chat_id=channel["_id"], from_chat_id=update.effective_chat.id, message_id=message.message_id)
-            successful_broadcasts["channels"] += 1
-        except Exception as e:
-            failed_broadcasts["channels"] += 1
+            failed_broadcasts["groups"] += 1          
 
     for user in users_collection.find():
         try:
@@ -224,7 +216,14 @@ def broadcast(update: Update, context: CallbackContext):
         except Exception as e:
             failed_broadcasts["users"] += 1
 
-    summary_message = f"Broadcast summary:\nSuccessful broadcasts:\nGroups: {successful_broadcasts['groups']}\nUsers: {successful_broadcasts['users']}\nFailed broadcasts:\nGroups: {failed_broadcasts['groups']}\nUsers: {failed_broadcasts['users']}"
+   for channel in channels_collection.find():
+        try:
+            context.bot.copy_message(chat_id=channel["_id"], from_chat_id=update.effective_chat.id, message_id=message.message_id)
+            successful_broadcasts["channels"] += 1
+        except Exception as e:
+            failed_broadcasts["channels"] += 1
+
+    summary_message = f"Broadcast summary:\nSuccessful broadcasts:\nGroups: {successful_broadcasts['groups']}\nUsers: {successful_broadcasts['users']}\nChannels: {successful_broadcasts['channels']}\nFailed broadcasts:\nGroups: {failed_broadcasts['groups']}\nUsers: {failed_broadcasts['users']}\nChannels: {failed_broadcasts['channels']"
     context.bot.send_message(chat_id=admin_user_id[0], text=summary_message)
 
     try:
@@ -255,24 +254,26 @@ def save_group(update: Update, context: CallbackContext):
         message = f"#New_Group : {group_id}\nName: {group_name}\nUsername: {group_username}"
         context.bot.send_message(chat_id=admin_user_id[0], text=message)
         
+        
+message_handler = MessageHandler(Filters.status_update.new_chat_members, save_group)
+dispatcher.add_handler(message_handler)
+
 def save_channel(update: Update, context: CallbackContext):
-      if update.effective_chat.type == "channel":
+    if update.effective_chat.type == 'channel':
         channel = update.effective_chat
         channel_id = channel.id
-        channel_name = channel.title or "N/A"
-        channel_username = channel.username or "N/A"
+        channel_username = channel.username or 'N/A'
 
         channels_collection.update_one({"_id": channel_id}, {"$set": {"_id": channel_id}}, upsert=True)
 
         admin_user_id = (primary_admin_id)
-        channel_name = escape_markdown(channel_name)
         channel_username = escape_markdown(channel_username)
-        message = f"#New_Channel : {channel_id}\nName: {channel_name}\nUsername: {channel_username}"
+        message = f"#New_Channel ID: {channel_id}\nUsername: {channel_username}" 
         context.bot.send_message(chat_id=admin_user_id[0], text=message)
 
 
-message_handler = MessageHandler(Filters.status_update.new_chat_members, save_group, save_channel)
-dispatcher.add_handler(message_handler)
+channel_handler = MessageHandler(Filters.status_update.new_chat_members, save_channel)
+dispatcher.add_handler(channel_handler)
 
 def stats(update: Update, context: CallbackContext):
     admin_user_id = (primary_admin_id, 6305575094, 6704116482)
