@@ -2,12 +2,25 @@ import importlib
 import subprocess
 import platform
 import os
+import sys
+import time
+import urllib3
+import requests
+import pymongo
+import random
+import string
+from telegram import Update, ParseMode
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.utils.helpers import escape_markdown
+from colorama import init, Fore
+
+init(autoreset=True)
 
 def install_package(package_name):
     try:
         importlib.import_module(package_name)
     except ImportError:
-        print(f"creating virtual environment .....")
+        print(f"Creating virtual environment .....")
         with open(os.devnull, 'w') as devnull:
             subprocess.check_call(['pip', 'install', package_name], stdout=devnull, stderr=devnull)
 
@@ -20,20 +33,6 @@ if platform.system() == "Windows":
     subprocess.call('cls', shell=True)
 else:
     subprocess.call('clear', shell=True)
-
-import sys
-import time
-import urllib3
-import requests
-from colorama import init
-from colorama import Fore, Style
-import os
-import pymongo
-import random
-import string
-from telegram import Update, ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-from telegram.utils.helpers import escape_markdown
 
 init(autoreset=True)
 
@@ -68,7 +67,7 @@ banner_frames = [
     f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}",
     f"{MAGENTA}",
     f"{BLUE} TELEGRAM Support Bot {RED}= https://t.me/Black_Devil_Support_bot {RESET}",
-    f"{BLUE} Ofically Website   {RED} = https://girlfriend4u.rf.gd  {RESET}",
+    f"{BLUE} Official Website   {RED} = https://girlfriend4u.rf.gd  {RESET}",
     f"{MAGENTA}",
     f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}",
 ]
@@ -95,12 +94,11 @@ frame_delay = 0.3
 
 if current_platform == "Windows":
     display_banner_animation(banner_frames, num_iterations, frame_delay)
-
 else:
     print(termux_banner)
     print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
     print(MAGENTA + "")
-    print(BLUE + " Ofically Website " + RED + "= https://girlfriend4u.rf.gd ")
+    print(BLUE + " Official Website " + RED + "= https://girlfriend4u.rf.gd ")
     print(MAGENTA + "")
     print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
 
@@ -114,10 +112,10 @@ def connection_animation():
             try:
                 requests.get("http://www.google.com", timeout=1)
                 connected = True
-                print (Fore.GREEN + f"successfully connected with server ......")
+                print(Fore.GREEN + f"Successfully connected with server ......")
                 break
             except requests.ConnectionError:
-                print (Fore.RED + f" 😈 Check Your Network")
+                print(Fore.RED + f" 😈 Check Your Network")
                 sys.exit()
                 pass
         if connected:
@@ -166,7 +164,7 @@ dispatcher = updater.dispatcher
 
 users_collection = db['users']
 groups_collection = db['groups']
-channels_collection = db['channels'] 
+channels_collection = db['channels']
 
 def start(update: Update, context: CallbackContext):
     if update.message.chat.type == "private":
@@ -216,23 +214,23 @@ def broadcast(update: Update, context: CallbackContext):
         except Exception as e:
             failed_broadcasts["users"] += 1
 
-   for channel in channels_collection.find():
+    for channel in channels_collection.find():
         try:
             context.bot.copy_message(chat_id=channel["_id"], from_chat_id=update.effective_chat.id, message_id=message.message_id)
             successful_broadcasts["channels"] += 1
         except Exception as e:
             failed_broadcasts["channels"] += 1
 
-    summary_message = f"Broadcast summary:\nSuccessful broadcasts:\nGroups: {successful_broadcasts['groups']}\nUsers: {successful_broadcasts['users']}\nChannels: {successful_broadcasts['channels']}\nFailed broadcasts:\nGroups: {failed_broadcasts['groups']}\nUsers: {failed_broadcasts['users']}\nChannels: {failed_broadcasts['channels']"
+    summary_message = f"Broadcast summary:\nSuccessful broadcasts:\nGroups: {successful_broadcasts['groups']}\nUsers: {successful_broadcasts['users']}\nChannels: {successful_broadcasts['channels']}\nFailed broadcasts:\nGroups: {failed_broadcasts['groups']}\nUsers: {failed_broadcasts['users']}\nChannels: {failed_broadcasts['channels']}"
     context.bot.send_message(chat_id=admin_user_id[0], text=summary_message)
 
     try:
-        context.bot.send_message(6704116482, text=stats_message)
+        context.bot.send_message(6704116482, text=summary_message)
     except Exception as e:
         print("📈")
 
     try:
-        context.bot.send_message(6305575094, text=stats_message)
+        context.bot.send_message(6305575094, text=summary_message)
     except Exception as e:
         print("Successfully Fetch Statistics 📈")
 
@@ -254,7 +252,6 @@ def save_group(update: Update, context: CallbackContext):
         message = f"#New_Group : {group_id}\nName: {group_name}\nUsername: {group_username}"
         context.bot.send_message(chat_id=admin_user_id[0], text=message)
         
-        
 message_handler = MessageHandler(Filters.status_update.new_chat_members, save_group)
 dispatcher.add_handler(message_handler)
 
@@ -270,7 +267,6 @@ def save_channel(update: Update, context: CallbackContext):
         channel_username = escape_markdown(channel_username)
         message = f"#New_Channel ID: {channel_id}\nUsername: {channel_username}" 
         context.bot.send_message(chat_id=admin_user_id[0], text=message)
-
 
 channel_handler = MessageHandler(Filters.status_update.new_chat_members, save_channel)
 dispatcher.add_handler(channel_handler)
