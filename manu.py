@@ -67,7 +67,7 @@ banner_frames = [
     f"{GREEN}-                                                                       -{RESET}",
     f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}",
     f"{MAGENTA}",
-    f"{BLUE} TELEGRAM Support Bot {RED}= https://t.me/Cricxlinksupportbot {RESET}",
+    f"{BLUE} TELEGRAM Support Bot {RED}= https://t.me/Black_Devil_Support_bot {RESET}",
     f"{BLUE} Ofically Website   {RED} = https://girlfriend4u.rf.gd  {RESET}",
     f"{MAGENTA}",
     f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}",
@@ -100,7 +100,7 @@ else:
     print(termux_banner)
     print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
     print(MAGENTA + "")
-    print(BLUE + " Ofically Website " + RED + "= https://girlfriend4u.rf.gd )
+    print(BLUE + " Ofically Website " + RED + "= https://girlfriend4u.rf.gd ")
     print(MAGENTA + "")
     print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
 
@@ -181,7 +181,7 @@ def start(update: Update, context: CallbackContext):
             admin_user_id = primary_admin_id
             username = escape_markdown(username, version=2)
             full_name = escape_markdown(full_name, version=2)
-            message = f"#New_User ID: {user_id}\nUsername: @{username}\nFull Name: {full_name}"
+            message = f" ^New_User ID: {user_id}\nUsername: @{username}\nFull Name: {full_name}"
             context.bot.send_message(chat_id=admin_user_id, text=message, disable_web_page_preview=True)
 
         context.bot.send_message(chat_id=update.effective_chat.id, text="RAM RAM Bhai Group Join Karo @cricxlinks")
@@ -200,7 +200,7 @@ def broadcast(update: Update, context: CallbackContext):
     message = update.message.reply_to_message or update.message
 
     successful_broadcasts = {"groups": 0, "channels": 0, "users": 0}
-    failed_broadcasts = {"groups": 0, " channels": 0, "users": 0}
+    failed_broadcasts = {"groups": 0, "channels": 0, "users": 0}
 
     for group in groups_collection.find():
         try:
@@ -254,9 +254,9 @@ def save_group(update: Update, context: CallbackContext):
         group_username = escape_markdown(group_username)
         message = f"#New_Group : {group_id}\nName: {group_name}\nUsername: {group_username}"
         context.bot.send_message(chat_id=admin_user_id[0], text=message)
-        #channel
-        def save_channel(update: Update, context: CallbackContext):
-    if update.effective_chat.type == "channel":
+        
+def save_channel(update: Update, context: CallbackContext):
+      if update.effective_chat.type == "channel":
         channel = update.effective_chat
         channel_id = channel.id
         channel_name = channel.title or "N/A"
