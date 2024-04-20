@@ -258,21 +258,20 @@ message_handler = MessageHandler(Filters.status_update.new_chat_members, save_gr
 dispatcher.add_handler(message_handler)
 
 def save_channel(update: Update, context: CallbackContext):
-    if update.effective_chat.type == "channel":
-        channel = update.effective_chat
-        channel_id = channel.id
-        channel_name = channel.title or "N/A"
-        channel_username = channel.username or "N/A"
+    channel = update.effective_chat
+    channel_id = channel.id
+    channel_name = channel.title or "N/A"
+    channel_username = channel.username or "N/A"
 
-        channels_collection.update_one({"_id": channel_id}, {"$set": {"_id": channel_id}}, upsert=True)
+    channels_collection.update_one({"_id": channel_id}, {"$set": {"_id": channel_id}}, upsert=True)
 
-        admin_user_id = (primary_admin_id)
-        channel_name = escape_markdown(channel_name)
-        channel_username = escape_markdown(channel_username)
-        message = f"#New_Channel : {channel_id}\nName: {channel_name}\nUsername: {channel_username}"
-        context.bot.send_message(chat_id=admin_user_id[0], text=message)
+    admin_user_id = (primary_admin_id)
+    channel_name = escape_markdown(channel_name)
+    channel_username = escape_markdown(channel_username)
+    message = f"#New_Channel : {channel_id}\nName: {channel_name}\nUsername: {channel_username}"
+    context.bot.send_message(chat_id=admin_user_id[0], text=message)
 
-message_handler = MessageHandler(Filters.status_update.new_chat_members, save_channel)
+message_handler = MessageHandler(Filters.status_update.new_chat_members & Filters.chat_type.private, save_channel)
 dispatcher.add_handler(message_handler)
 
 def stats(update: Update, context: CallbackContext):
