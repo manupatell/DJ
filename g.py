@@ -219,12 +219,12 @@ def broadcast(update: Update, context: CallbackContext):
         except Exception as e:
             failed_broadcasts["users"] += 1
 
-   for channel in channels_collection.find():
-        try:
-            context.bot.copy_message(chat_id=channel["_id"], from_chat_id=update.effective_chat.id, message_id=message.message_id)
-            successful_broadcasts["channels"] += 1
-        except Exception as e:
-            failed_broadcasts["channels"] += 1
+for channel in channels_collection.find():
+    try:
+        context.bot.copy_message(chat_id=channel["_id"], from_chat_id=update.effective_chat.id, message_id=message.message_id)
+        successful_broadcasts["channels"] += 1
+    except Exception as e:
+        failed_broadcasts["channels"] += 1
 
     summary_message = f"Broadcast summary:\nSuccessful broadcasts:\nGroups: {successful_broadcasts['groups']}\nUsers: {successful_broadcasts['users']}\nChannels: {successful_broadcasts['channels']}\nFailed broadcasts:\nGroups: {failed_broadcasts['groups']}\nUsers: {failed_broadcasts['users']}\nChannels: {failed_broadcasts['channels']"
     context.bot.send_message(chat_id=admin_user_id[0], text=summary_message)
