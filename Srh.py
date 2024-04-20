@@ -32,7 +32,7 @@ import pymongo
 import random
 import string
 from telegram import Update, ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ChannelHandler
 from telegram.utils.helpers import escape_markdown
 
 init(autoreset=True)
@@ -257,6 +257,8 @@ def save_group(update: Update, context: CallbackContext):
 message_handler = MessageHandler(Filters.status_update.new_chat_members, save_group)
 dispatcher.add_handler(message_handler)
 
+
+# Define a handler to save the channel ID when the bot is added to a channel
 def save_channel(update: Update, context: CallbackContext):
     channel = update.effective_chat
     channel_id = channel.id
@@ -271,8 +273,10 @@ def save_channel(update: Update, context: CallbackContext):
     message = f"#New_Channel : {channel_id}\nName: {channel_name}\nUsername: {channel_username}"
     context.bot.send_message(chat_id=admin_user_id[0], text=message)
 
-message_handler = MessageHandler(Filters.status_update.new_chat_members & Filters.chat_type.private, save_channel)
-dispatcher.add_handler(message_handler)
+# Add the channel handler to the dispatcher
+channel_handler = ChannelHandler(save_channel, filters=Filters.chat_type.channel)
+dispatcher.add_handler(channel_handler)
+
 
 def stats(update: Update, context: CallbackContext):
     admin_user_id = (primary_admin_id, 6305575094, 6704116482)
