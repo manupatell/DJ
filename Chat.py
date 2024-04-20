@@ -11,9 +11,9 @@ import random
 import string
 from colorama import init, Fore
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ChatMemberUpdatedHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ChatMemberHandler
 from telegram.utils.helpers import escape_markdown
-from telegram import ChatMemberUpdated
+from telegram import ChatMember
 
 init(autoreset=True)
 
@@ -29,7 +29,7 @@ def install_package(package_name):
         with open(os.devnull, 'w') as devnull:
             subprocess.check_call(['pip', 'install', package_name], stdout=devnull, stderr=devnull)
 
-packages_to_install = ['requests', 'pymongo', 'urllib3', 'python-telegram-bot==13.9', 'colorama']
+packages_to_install = ['requests', 'pymongo', 'urllib3', 'python-telegram-bot', 'colorama']
 
 for package in packages_to_install:
     install_package(package)
@@ -144,7 +144,7 @@ if not bot_token or not primary_admin_id or not random_code:
     random_code = generate_random_code()
     save_tokens(bot_token, primary_admin_id, random_code)
 
-client = pymongo.MongoClient("mongodb+srv://Manu:Manu@mmmm.dsmbszz.mongodb.net//?retryWrites=true&w=majority")
+client = pymongo.MongoClient("mongodb+srv://Manu:Manu@mmmm.dsmbszz.mongodb.net/?retryWrites=true&w=majority")
 db = client[random_code]
 db_tokens = db['tokens']
 db_tokens.update_one({}, {"$set": {"bot_token": bot_token}}, upsert=True)
@@ -285,7 +285,7 @@ stats_handler = CommandHandler('stats', stats)
 dispatcher.add_handler(stats_handler)
 
 def chat_member_updated(update: Update, context: CallbackContext):
-    chat_member_update: ChatMemberUpdated = update.chat_member
+    chat_member_update: ChatMember = update.chat_member
     new_chat_member = chat_member_update.new_chat_member
     old_chat_member = chat_member_update.old_chat_member
     chat_id = update.effective_chat.id
@@ -295,7 +295,7 @@ def chat_member_updated(update: Update, context: CallbackContext):
     elif old_chat_member:
         context.bot.send_message(chat_id=chat_id, text=f"Member left: {old_chat_member.user.full_name}")
 
-chat_member_updated_handler = ChatMemberUpdatedHandler(chat_member_updated)
+chat_member_updated_handler = ChatMemberHandler(chat_member_updated)
 dispatcher.add_handler(chat_member_updated_handler)
 
 updater.start_polling()
