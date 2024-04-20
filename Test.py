@@ -556,10 +556,6 @@ def save_channel(update: Update, context: CallbackContext):
         "channel_name": channel_name 
     })
 
-async def is_channel_present(channel_id: int) -> bool:
-    channel = await channelsdb.find_one({"channel_id": channel_id})
-    return channel is not None
-
 async def is_served_channel(chat_id: int) -> bool:
     channel = await is_channel_present(chat_id)
     return channel
