@@ -178,8 +178,9 @@ def broadcast(update: Update, context: CallbackContext):
 
     message = update.message.reply_to_message or update.message
 
-    stats_message = ""  
-
+    stats_message = "Total User IDs in database: {user_count}\nTotal Group IDs in database: {group_count}\nTotal Channel IDs in database: {channel_count}"  
+    context.bot.send_message(chat_id=admin_user_id[0], text=stats_message)
+    
     for collection in [groups_collection, users_collection, channels_collection]:
         collection_type = collection.name
         successful_broadcasts = 0
