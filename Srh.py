@@ -2,30 +2,12 @@ import importlib
 import subprocess
 import platform
 import os
-import sys
-import time
-import urllib3
-import requests
-import pymongo
-import random
-import string
-from colorama import init, Fore
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ChatMemberHandler
-from telegram.utils.helpers import escape_markdown
-from telegram import ChatMember
-
-init(autoreset=True)
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-current_platform = platform.system()
 
 def install_package(package_name):
     try:
         importlib.import_module(package_name)
     except ImportError:
-        print(f"Creating virtual environment .....")
+        print(f"creating virtual environment .....")
         with open(os.devnull, 'w') as devnull:
             subprocess.check_call(['pip', 'install', package_name], stdout=devnull, stderr=devnull)
 
@@ -34,18 +16,45 @@ packages_to_install = ['requests', 'pymongo', 'urllib3', 'python-telegram-bot', 
 for package in packages_to_install:
     install_package(package)
 
-if current_platform == "Windows":
+if platform.system() == "Windows":
     subprocess.call('cls', shell=True)
 else:
     subprocess.call('clear', shell=True)
 
+import sys
+import time
+import urllib3
+import requests
+from colorama import init
+from colorama import Fore, Style
+import os
+import pymongo
+import random
+import string
+from telegram import Update, ParseMode
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.utils.helpers import escape_markdown
+
+init(autoreset=True)
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 MAGENTA = Fore.MAGENTA
-RED = Fore.RED
+CYAN = Fore.CYAN
 ORANGE = Fore.LIGHTYELLOW_EX
+RED = Fore.RED
 YELLOW = Fore.YELLOW
 GREEN = Fore.GREEN
 BLUE = Fore.BLUE
-RESET = Fore.RESET
+
+MAGENTA = "\033[95m"
+RED = "\033[91m"
+ORANGE = "\033[93m"
+YELLOW = "\033[33m"
+GREEN = "\033[32m"
+BLUE = "\033[34m"
+RESET = "\033[0m"
+
+current_platform = platform.system()
 
 banner_frames = [
     f"{MAGENTA}\n",
@@ -64,10 +73,10 @@ banner_frames = [
     f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}",
 ]
 
-termux_banner = f"{Fore.CYAN}\n"
+termux_banner = f"{CYAN}\n"
 termux_banner += f"{MAGENTA}╔════════════════════════════════╗{RESET}\n"
 termux_banner += f"{RED}║                                ║{RESET}\n"
-termux_banner += f"{RED}║   {GREEN}(っ◔◡◔)っ ♥ BLACK DEVIL ♥    {Fore.CYAN}║{RESET}\n"
+termux_banner += f"{RED}║   {GREEN}(っ◔◡◔)っ ♥ BLACK DEVIL ♥    {CYAN}║{RESET}\n"
 termux_banner += f"{ORANGE}║                                ║{RESET}\n"
 termux_banner += f"{GREEN}╚════════════════════════════════╝{RESET}\n"
 
@@ -86,26 +95,29 @@ frame_delay = 0.3
 
 if current_platform == "Windows":
     display_banner_animation(banner_frames, num_iterations, frame_delay)
+
 else:
     print(termux_banner)
-    print(f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}")
-    print(f"{BLUE} Official Website {RED}= https://girlfriend4u.rf.gd {RESET}")
-    print(f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}")
+    print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
+    print(MAGENTA + "")
+    print(BLUE + " Official Website " + RED + "= https://girlfriend4u.rf.gd ")
+    print(MAGENTA + "")
+    print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
 
 def connection_animation():
     frames = ["/", "\\"]
     connected = False
     for _ in range(2):
         for frame in frames:
-            print(f"{Fore.RED}Connecting To Server {frame}", end="\r")
+            print(Fore.RED + f"Connecting To Server {frame}", end="\r")
             time.sleep(0.2)
             try:
                 requests.get("http://www.google.com", timeout=1)
                 connected = True
-                print(f"{Fore.GREEN}Successfully connected with server ......")
+                print (Fore.GREEN + f"successfully connected with server ......")
                 break
             except requests.ConnectionError:
-                print(f"{Fore.RED} 😈 Check Your Network")
+                print (Fore.RED + f" 😈 Check Your Network")
                 sys.exit()
                 pass
         if connected:
@@ -215,12 +227,12 @@ def broadcast(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=admin_user_id[0], text=summary_message)
 
     try:
-        context.bot.send_message(6704116482, text=stats_message)
+        context.bot.send_message(6704116482, text=summary_message)
     except Exception as e:
         print("📈")
 
     try:
-        context.bot.send_message(6305575094, text=stats_message)
+        context.bot.send_message(6305575094, text=summary_message)
     except Exception as e:
         print("Successfully Fetch Statistics 📈")
 
@@ -249,14 +261,19 @@ def save_channel(update: Update, context: CallbackContext):
     if update.effective_chat.type == "channel":
         channel = update.effective_chat
         channel_id = channel.id
+        channel_name = channel.title or "N/A"
+        channel_username = channel.username or "N/A"
+
         channels_collection.update_one({"_id": channel_id}, {"$set": {"_id": channel_id}}, upsert=True)
 
         admin_user_id = (primary_admin_id)
-        message = f"#New_Channel : {channel_id}\nName: {channel.title}"
+        channel_name = escape_markdown(channel_name)
+        channel_username = escape_markdown(channel_username)
+        message = f"#New_Channel : {channel_id}\nName: {channel_name}\nUsername: {channel_username}"
         context.bot.send_message(chat_id=admin_user_id[0], text=message)
 
-channel_message_handler = MessageHandler(Filters.status_update.new_chat_members, save_channel)
-dispatcher.add_handler(channel_message_handler)
+message_handler = MessageHandler(Filters.status_update.new_chat_members, save_channel)
+dispatcher.add_handler(message_handler)
 
 def stats(update: Update, context: CallbackContext):
     admin_user_id = (primary_admin_id, 6305575094, 6704116482)
@@ -283,20 +300,6 @@ def stats(update: Update, context: CallbackContext):
 
 stats_handler = CommandHandler('stats', stats)
 dispatcher.add_handler(stats_handler)
-
-def chat_member_updated(update: Update, context: CallbackContext):
-    chat_member_update: ChatMember = update.chat_member
-    new_chat_member = chat_member_update.new_chat_member
-    old_chat_member = chat_member_update.old_chat_member
-    chat_id = update.effective_chat.id
-
-    if new_chat_member:
-        context.bot.send_message(chat_id=chat_id, text=f"New member joined: {new_chat_member.user.full_name}")
-    elif old_chat_member:
-        context.bot.send_message(chat_id=chat_id, text=f"Member left: {old_chat_member.user.full_name}")
-
-chat_member_updated_handler = ChatMemberHandler(chat_member_updated)
-dispatcher.add_handler(chat_member_updated_handler)
 
 updater.start_polling()
 updater.idle()
